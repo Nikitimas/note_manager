@@ -42,7 +42,7 @@ def analyze_deadline(issue_date):
 
         # Выводим результат анализа дедлайна
         if delta.days < 0:
-            return f"Внимание! Дедлайн истёк {delta.days} дней назад."
+            return f"Внимание! Дедлайн уже истёк."
         elif delta.days == 0:
             return "Дедлайн сегодня."
         else:
