@@ -99,7 +99,7 @@ def display_notes(notes):
         return
 
     for i, note in enumerate(notes, 1):
-        print(f"\n{i}. Имя пользователя: {note['Имя пользователя']}")
+        print(f"\n{i}. \033[33mИмя пользователя\033[0m: {note['Имя пользователя']}")
         print(f"   Заголовок: {note['Заголовок']}")
         print(f"   Описание: {note['Описание']}")
         print(f"   Статус: {note['Статус']}")
@@ -117,7 +117,7 @@ def delete_note_by_title(notes):
     title_to_delete = input("Введите заголовок заметки, которую хотите удалить: ").strip()
 
     for i, note in enumerate(notes):
-        if note['Заголовок'] == title_to_delete:
+        if title_to_delete in note['Заголовок']:
             del notes[i]
             print(f"Заметка с заголовком '{title_to_delete}' была удалена.")
             return
@@ -139,7 +139,7 @@ def delete_note_by_username(notes):
         print(f"У пользователя '{username_to_delete}' нет заметок.")
         return
 
-    for i in reversed(notes_to_delete):  # Удаляем в обратном порядке, чтобы избежать сдвига индексов
+    for i in reversed(notes_to_delete):
         del notes[i]
 
     print(f"Все заметки пользователя '{username_to_delete}' были удалены.")
