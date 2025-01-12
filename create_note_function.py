@@ -15,23 +15,6 @@ def collect_titles():
             print("Такой заголовок уже существует! Попробуйте снова.")
     return titles
 
-
-def analyze_deadline(issue_date):
-    """Вычисляет разницу между текущей датой и указанным дедлайном."""
-    try:
-        deadline_date = datetime.strptime(issue_date, "%d-%m-%Y")
-        current_date = datetime.now()
-        delta = current_date - deadline_date
-
-        if delta.days > 0:
-            return "Внимание! Дедлайн уже истёк."
-        elif delta.days == 0:
-            return "Дедлайн сегодня."
-        else:
-            return f"До дедлайна осталось {delta.days *(-1)} дней."
-    except ValueError:
-        return "[ERROR]:\033[31mНеверный формат даты. Убедитесь, что дата введена в формате ДД-ММ-ГГГГ.\033[0m"
-
 def validate_input(prompt, allow_empty=False):
     """
     Универсальная функция для валидации пользовательского ввода.
@@ -58,6 +41,56 @@ def validate_date(prompt):
         except ValueError:
             print("[ERROR]:\033[31m Неверный формат даты. Убедитесь, что дата введена в формате ДД-ММ-ГГГГ.\033[0m")
 
+def days_word_form(days):
+    """
+    Функция возвращает правильную форму слова "день/дня/дней" в зависимости от количества дней.
+    """
+    days = abs(days)  # Берем абсолютное значение, чтобы корректно работать с отрицательными числами
+    if 11 <= days % 100 <= 19:  # Для чисел от 11 до 19 всегда используется форма "дней"
+        return "дней"
+    elif days % 10 == 1:  # Если последняя цифра 1 (кроме случаев от 11 до 19)
+        return "день"
+    elif 2 <= days % 10 <= 4:  # Если последняя цифра 2, 3 или 4 (кроме случаев от 11 до 19)
+        return "дня"
+    else:  # Во всех остальных случаях (0, 5-9, 11-19)
+        return "дней"
+
+def analyze_deadline(issue_date):
+    try:
+        deadline_date = datetime.strptime(issue_date, "%d-%m-%Y")
+        current_date = datetime.now()
+
+        delta = current_date - deadline_date
+
+        # Выводим результат анализа дедлайна
+        if delta.days > 0:
+            return f"Внимание! Дедлайн истёк {abs(delta.days)} {days_word_form(delta.days)} назад."
+        elif delta.days == 0:
+            return "Дедлайн сегодня."
+        else:
+            return f"До дедлайна осталось {abs(delta.days)} {days_word_form(delta.days)}."
+    except ValueError:
+        print("[ERROR]: Неверный формат даты. Убедитесь, что дата введена в формате ДД-ММ-ГГГГ.")
+
+def change_note_status(notes):
+    if not notes:
+        print("Нет заметок для изменения статуса.")
+        return
+
+    display_notes(notes)
+
+    try:
+        note_id = int(input("\nВведите номер заметки, статус которой нужно изменить: ")) - 1
+        if 0 <= note_id < len(notes):
+            print("\nТекущий статус заметки:", notes[note_id]['Статус'])
+            new_status = get_status()
+            notes[note_id]['Статус'] = new_status
+            print("\n[INFO]:\033[33m Статус заметки успешно обновлён!\033[0m")
+        else:
+            print("Некорректный номер заметки. Попробуйте снова.")
+    except ValueError:
+        print("Некорректный ввод. Пожалуйста, введите число.")
+
 def get_status():
     """Позволяет выбрать один из предустановленных статусов заметки."""
     statuses = ["выполнено", "в процессе", "отложено"]
@@ -74,7 +107,6 @@ def get_status():
                 print("Некорректный выбор. Укажите число от 1 до 3.")
         except ValueError:
             print("Некорректный ввод. Введите число от 1 до 3.")
-
 
 def create_note():
     """Создаёт новую заметку на основе пользовательского ввода."""
@@ -121,7 +153,7 @@ def display_notes(notes):
 
     print(f"Вот текущий список ваших заметок ({len(notes)}):")
     for i, note in enumerate(notes, 1):
-        print(f"\n{i}. \033[33mИмя пользователя\033[0m: {note['Имя пользователя']}")
+        print(f"\n {i}.\033[33mИмя пользователя\033[0m: {note['Имя пользователя']}")
         print(f"   Заголовок: {', '.join(note['Заголовок'])}")
         print(f"   Описание: {note['Описание']}")
         print(f"   Статус: {note['Статус']}")
@@ -218,32 +250,36 @@ def main():
         print("\nЧто вы хотите сделать?")
         print("1. Добавить новую заметку")
         print("2. Просмотреть все заметки")
-        print("3. Удалить заметку по заголовку")
-        print("4. Удалить заметки по имени пользователя")
-        print("5. Выйти")
+        print("3. Изменить статус заметки")
+        print("4. Удалить заметку по заголовку")
+        print("5. Удалить заметки по имени пользователя")
+        print("6. Выйти")
 
         try:
             choice = int(input("Введите номер действия: "))
         except ValueError:
-            print("Некорректный ввод. Пожалуйста, введите число от 1 до 5.")
+            print("Некорректный ввод. Пожалуйста, введите число от 1 до 6.")
             continue
 
         if choice == 1:
-            notes.append(create_note())
+            note = create_note()
+            notes.append(note)
         elif choice == 2:
             display_notes(notes)
         elif choice == 3:
-            delete_note_by_title(notes)
+            change_note_status(notes)
         elif choice == 4:
-            delete_note_by_username(notes)
+            delete_note_by_title(notes)
         elif choice == 5:
+            delete_note_by_username(notes)
+        elif choice == 6:
             print("Выход из программы. До свидания!")
             break
         else:
-            print("Некорректный выбор. Введите число от 1 до 5.")
-
+            print("Некорректный выбор. Введите число от 1 до 6.")
 
 if __name__ == "__main__":
     main()
 #Функция для создания новой заметки и возврата словаря реализовал еще прежде
 #Здесь добавил отдельную функцию валидации даты, убрал уже ненужное, добавил проверку на пустые значения
+#Автоматически добавляет в словарь нынешнюю дату
