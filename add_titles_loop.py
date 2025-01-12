@@ -3,7 +3,7 @@ username = input("Введите имя пользователя: ")
 titles = []
 print("Введите заголовки заметки (нажмите Enter дважды или \"стоп\", чтобы завершить ввод заголовков):")
 while True:
-    title = input("- ")
+    title = input("- ").strip()
     if title.strip().lower() == "стоп" or title.strip() == "":
         break
     if title.strip() not in titles:
