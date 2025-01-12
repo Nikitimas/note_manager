@@ -5,7 +5,7 @@ def collect_titles():
     titles = []
     print("Введите заголовки заметки (нажмите Enter дважды или \"стоп\", чтобы завершить ввод заголовков):")
     while True:
-        title = input("- ")
+        title = input("- ").strip()
         if title.strip().lower() == "стоп" or title.strip() == "":
             break
         if title.strip() not in titles:
@@ -32,23 +32,75 @@ def get_status():
             print("Некорректный ввод. Введите число от 1 до 3.")
 
 
+def update_status(note):
+    while True:
+        print("\n--- Обновление статуса заметки ---")
+        print(f"Текущий статус: {note[2]}")
+        change = input("Хотите изменить статус заметки? (да/нет): ").strip().lower()
+        if change == "да":
+            note[2] = get_status()
+            print("Статус успешно обновлен.")
+        elif change == "нет":
+            print("Изменение статуса отменено.")
+            break
+        else:
+            print("Некорректный ввод. Пожалуйста, введите \"да\" или \"нет\".")
+
+def days_word_form(days):
+    """
+    Функция возвращает правильную форму слова "день/дня/дней" в зависимости от количества дней.
+    """
+    days = abs(days)  # Берем абсолютное значение, чтобы корректно работать с отрицательными числами
+    if 11 <= days % 100 <= 19:  # Для чисел от 11 до 19 всегда используется форма "дней"
+        return "дней"
+    elif days % 10 == 1:  # Если последняя цифра 1 (кроме случаев от 11 до 19)
+        return "день"
+    elif 2 <= days % 10 <= 4:  # Если последняя цифра 2, 3 или 4 (кроме случаев от 11 до 19)
+        return "дня"
+    else:  # Во всех остальных случаях (0, 5-9, 11-19)
+        return "дней"
+
 # Проверка дедлайна
 def analyze_deadline(issue_date):
     try:
         deadline_date = datetime.strptime(issue_date, "%d-%m-%Y")
         current_date = datetime.now()
 
-        delta = deadline_date - current_date
+        delta =current_date-deadline_date
 
         # Выводим результат анализа дедлайна
-        if delta.days < 0:
-            return f"Внимание! Дедлайн уже истёк."
+        if delta.days > 0:
+            return f"Внимание! Дедлайн истёк {abs(delta.days)} {days_word_form(delta.days)} назад."
         elif delta.days == 0:
             return "Дедлайн сегодня."
         else:
-            return f"До дедлайна осталось {delta.days} дней."
+            return f"До дедлайна осталось {abs(delta.days)} {days_word_form(delta.days)}."
     except ValueError:
         print("[ERROR]: Неверный формат даты. Убедитесь, что дата введена в формате ДД-ММ-ГГГГ.")
+
+def main_menu(note):
+    while True:
+        print("\n--- Главное меню ---")
+        print("1. Просмотреть заметку")
+        print("2. Изменить статус заметки")
+        print("3. Завершить работу")
+
+        choice = input("Выберите действие (1-3): ").strip()
+        if choice == "1":
+            print("\n--- Ваша заметка ---")
+            print("Имя пользователя:", note[0])
+            print("Заголовки:", ", ".join(note[5]))
+            print("Содержание заметки:", note[1])
+            print("Статус заметки:", note[2])
+            print("Дата создания:", note[3])
+            print("Дата изменения/истечения:", note[4])
+        elif choice == "2":
+            update_status(note)
+        elif choice == "3":
+            print("Завершение работы. До свидания!")
+            break
+        else:
+            print("Некорректный выбор. Пожалуйста, выберите действие из меню.")
 
 
 def main():
@@ -86,5 +138,6 @@ def main():
     print("Дата дедлайна:", note[4])
     print("До дедлайна:", note[6])
 
+    main_menu(note)
 if __name__ == "__main__":
     main()
