@@ -1,9 +1,8 @@
 def collect_titles():
-
     titles = []
     print("Введите заголовки заметки (нажмите Enter дважды или \"стоп\", чтобы завершить ввод заголовков):")
     while True:
-        title = input("- ")
+        title = input("- ").strip()
         if title.strip().lower() == "стоп" or title.strip() == "":
             break
         if title.strip() not in titles:
@@ -28,6 +27,43 @@ def get_status():
         except ValueError:
             print("Некорректный ввод. Введите число от 1 до 3.")
 
+def update_status(note):
+    while True:
+        print("\n--- Обновление статуса заметки ---")
+        print(f"Текущий статус: {note[2]}")
+        change = input("Хотите изменить статус заметки? (да/нет): ").strip().lower()
+        if change == "да":
+            note[2] = get_status()
+            print("Статус успешно обновлен.")
+        elif change == "нет":
+            print("Изменение статуса отменено.")
+            break
+        else:
+            print("Некорректный ввод. Пожалуйста, введите \"да\" или \"нет\".")
+
+def main_menu(note):
+    while True:
+        print("\n--- Главное меню ---")
+        print("1. Просмотреть заметку")
+        print("2. Изменить статус заметки")
+        print("3. Завершить работу")
+
+        choice = input("Выберите действие (1-3): ").strip()
+        if choice == "1":
+            print("\n--- Ваша заметка ---")
+            print("Имя пользователя:", note[0])
+            print("Заголовки:", ", ".join(note[5]))
+            print("Содержание заметки:", note[1])
+            print("Статус заметки:", note[2])
+            print("Дата создания:", note[3])
+            print("Дата изменения/истечения:", note[4])
+        elif choice == "2":
+            update_status(note)
+        elif choice == "3":
+            print("Завершение работы. До свидания!")
+            break
+        else:
+            print("Некорректный выбор. Пожалуйста, выберите действие из меню.")
 
 def main():
     username = input("Введите имя пользователя: ")
@@ -46,13 +82,8 @@ def main():
         titles,
     ]
 
-    print("\n--- Ваша заметка ---")
-    print("Имя пользователя:", note[0])
-    print("Заголовки:", ", ".join(note[5]))
-    print("Содержание заметки:", note[1])
-    print("Статус заметки:", note[2])
-    print("Дата создания:", note[3])
-    print("Дата изменения/истечения:", note[4])
+    main_menu(note)
 
 if __name__ == "__main__":
     main()
+#Исправлено - можно изменять статус заметки
